@@ -1,0 +1,32 @@
+Function Designs
+
+mymalloc:
+
+metadata: type int. even number if unallocated, odd if allocated.
+
+Work Flow:
+	Initialize metadata for simulated memory: *(int*)myblock[0] = 5000;
+
+	Get input from user: size of requested memory. type: size_t
+
+	Traverse simulated memory(char array) to find an unallocated block.
+
+	If available, write new meta data for this newly allocated block, then
+	write metadata for remaining space(unallocated).
+
+	Return pointer to the start of the newly allocated block. Null if not available.
+
+Traverse Function:
+	Jump from one metadata to another in this array.
+	Start from *(int*)myblock[0]; - It helps to use an variable to store current address.
+	If it's even, write metadata to current address. Change size to requested size. Change status to allocated. Calculate remaining size for this block. Write meta data to current address+4+size.
+	return the metadata address + 4;
+	If it's odd, get to next metadata address, which is [current address]+4+[size of this block]
+
+
+free:
+	input: void* since we don't know the type. Cast it to char* in myblock.
+	[input adress - 4] is the address of metadata. Set it to unallocated.
+	If there is a free block after this one, it's easy to combine them. But not so easy for the previous one.
+	We might as well traverse the whole array to comibne all neighboring free blocks.
+
