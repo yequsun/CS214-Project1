@@ -5,7 +5,7 @@ mymalloc:
 metadata: type int. even number if unallocated, odd if allocated.
 
 Work Flow:
-	Initialize metadata for simulated memory: *(int*)myblock[0] = 5000;
+	Initialize metadata for simulated memory: *(int*)&myblock[0] = 5000;
 
 	Get input from user: size of requested memory. type: size_t
 
@@ -18,7 +18,7 @@ Work Flow:
 
 Traverse Function:
 	Jump from one metadata to another in this array.
-	Start from *(int*)myblock[0]; - It helps to use an variable to store current address.
+	Start from (int*)&myblock[0]; - It helps to use an variable to store current address.
 	If it's even, write metadata to current address. Change size to requested size. Change status to allocated. Calculate remaining size for this block. Write meta data to current address+4+size.
 	return the metadata address + 4;
 	If it's odd, get to next metadata address, which is [current address]+4+[size of this block]
