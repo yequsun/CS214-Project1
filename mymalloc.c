@@ -113,6 +113,7 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 				new_metadata->alloc_flag = 0;
 				new_metadata->size = old_size-sizeof(Metadata);
 				new_metadata->last_flag = old_last_flag;
+				cur->last_flag = 0;
 				new_metadata->prev_index = get_index(new_metadata);
 			}
 
