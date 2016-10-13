@@ -17,9 +17,13 @@ const int max_size;
 const int min_alloc;
 //minimum allocated size
 
-int get_index(Metadata* cur);
+int get_size(Metadata* cur);//size of the block
 
-void* get_address(Metadata* cur);
+int get_index(Metadata* cur);//index of the metadata is myblock[]
+
+int is_last(Metadata* cur);//if this block is the last one
+
+void* get_address(Metadata* cur); //pointer to the start of the allocated space
 
 typedef struct{
 	unsigned int size:31;//The size of this block
@@ -32,7 +36,7 @@ Metadata* prev(Metadata* cur); //returns the pointer to the previous block.
 
 Metadata* next(Metadata* cur); //returns the pointer to the next block.
 
-void init();
+void init();//initalize the metadata of the first block
 
 
 void* mymalloc(size_t size, const char* file_name, int line_number);

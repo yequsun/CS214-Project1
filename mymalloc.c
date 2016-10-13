@@ -95,7 +95,7 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 		//the minimal allocated size is 8 bytes
 	}
 
-	Metadata* cur = &myblock[0];//Start from the first metadata
+	Metadata* cur = first_metadata;//Start from the first metadata
 	do{
 		if(!allocated(cur) && get_size(cur)>=req_size){
 			//this block fits. Allocate memory here
@@ -110,6 +110,7 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 				temp += (sizeof(Metadata)+get_size(cur));
 				new_metadata = (Metadata*)temp;
 
+				//set attributes for new metadata
 				new_metadata->alloc_flag = 0;
 				new_metadata->size = old_size-sizeof(Metadata);
 				new_metadata->last_flag = old_last_flag;
@@ -127,4 +128,36 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 		}
 	}while(!is_last(cur));
 	return NULL;
+}
+
+void myfree(void* ptr, const char* file_name, int line_number){
+	
+	if((ptr-sizeof(Metadata)) < first_metadata || ptr > &myblock[max_size-1]){
+		printf("Error\n");
+		exit(0);
+	}
+	
+	Metadata* meta_ptr = (Metadata*)(ptr - sizeof(Metadata));
+	
+	if(!allocated(meta_ptr)){
+		printf("Error\n");
+		exit(0);
+	}
+	
+	meta_ptr->alloc_flag = 0;
+	int new_size;
+	
+	//merge right
+	Metadata* next = next(meta_ptr);
+	if(meta_ptr->last_flag == 0 && next->alloc_flag == 0){
+		new_size = get_size(meta_ptr) + get_size(next) + sizeof(Metadata);
+		meta_ptr->size = new_size;
+	}
+			
+	//merge left
+	Metadata* prev = prev(meta_ptr);
+	if(prev->alloc_flag == 0){
+		new_size = get_size(meta_ptr) + get_size(prev) + sizeof(Metadata);
+		prev->size = new_size;
+	}
 }
