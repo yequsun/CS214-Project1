@@ -4,7 +4,7 @@
 
 max_size = sizeof(myblock);
 min_alloc = 1;
-Metadata* first_metadata = &myblock[0]
+Metadata* first_metadata = &myblock[0];
 
 void init(){
 	Metadata* initial_metadata = first_metadata;
@@ -86,7 +86,7 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 	}
 	*/
 	if(req_size + sizeof(Metadata) > max_size){
-		return null;
+		return NULL;
 		//no enough space
 	}
 
@@ -131,33 +131,38 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 }
 
 void myfree(void* ptr, const char* file_name, int line_number){
-	
+
+	if(ptr == NULL){
+		//printf("Error in %s, line %d: Null pointer.\n", file_name, line_number);
+		return;
+	}
+
 	if((ptr-sizeof(Metadata)) < first_metadata || ptr > &myblock[max_size-1]){
-		printf("Error\n");
-		exit(0);
+		printf("Error in %s, line %d: Invalid pointer.\n", file_name, line_number);
+		return;
 	}
 	
 	Metadata* meta_ptr = (Metadata*)(ptr - sizeof(Metadata));
 	
 	if(!allocated(meta_ptr)){
-		printf("Error\n");
-		exit(0);
+		printf("Error in %s, line %d: Can't free unallocated memory.\n", file_name, line_number);
+		return;
 	}
 	
 	meta_ptr->alloc_flag = 0;
 	int new_size;
 	
 	//merge right
-	Metadata* next = next(meta_ptr);
-	if(meta_ptr->last_flag == 0 && next->alloc_flag == 0){
-		new_size = get_size(meta_ptr) + get_size(next) + sizeof(Metadata);
+	Metadata* nxt = next(meta_ptr);
+	if(meta_ptr->last_flag == 0 && nxt->alloc_flag == 0){
+		new_size = get_size(meta_ptr) + get_size(nxt) + sizeof(Metadata);
 		meta_ptr->size = new_size;
 	}
 			
 	//merge left
-	Metadata* prev = prev(meta_ptr);
-	if(prev->alloc_flag == 0){
-		new_size = get_size(meta_ptr) + get_size(prev) + sizeof(Metadata);
-		prev->size = new_size;
+	Metadata* prv = prev(meta_ptr);
+	if(prv->alloc_flag == 0){
+		new_size = get_size(meta_ptr) + get_size(prv) + sizeof(Metadata);
+		prv->size = new_size;
 	}
 }

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
-//#include "mymalloc.h"
+#include "mymalloc.h"
 
 double workloadA(){
 	void* p_array[3000];
@@ -12,7 +12,7 @@ double workloadA(){
 	gettimeofday(&t1, NULL);
 	
 	for(i = 0; i < 3000; i++){
-		p_array[i] = malloc(1);
+		p_array[i] = NULL;
 	}
 	
 	for(i = 0; i < 3000; i++){
@@ -23,7 +23,7 @@ double workloadA(){
 	
 	double timespent = (t2.tv_sec - t1.tv_sec) * 1000.0;
 	timespent += (t2.tv_usec - t1.tv_usec) / 1000.0;
-	
+
 	return timespent;
 }
 
@@ -153,12 +153,29 @@ double workloadD(){
 void main(){
 	
 	srand((unsigned int)time(NULL));
+	int i;
+	double sumA = 0,
+		sumB = 0,
+		sumC = 0,
+		sumD = 0;
 	
-	workloadA();
-	workloadB();
-	workloadC();
-	workloadD();
+
+	for(i = 0; i < 100; i++){
+
+	sumA += workloadA();
+	//sumB += workloadB();
+	//sumC += workloadC();
+	//sumD += workloadD();
 	
-	//workloadE();
-	//workloadF();
+	//sumE += workloadE();
+	//sumF += workloadF();
+	}
+
+	printf("Workload A averaged %lf ms.\n", (sumA / 100));
+	//printf("Workload B averaged %lf ms.\n", (sumB / 100));
+	//printf("Workload C averaged %lf ms.\n", (sumC / 100));
+	//printf("Workload D averaged %lf ms.\n", (sumD / 100));
+	
+	//printf("Workload E averaged %lf ms.\n", (sumE / 100));
+	//printf("Workload F averaged %lf ms.\n", (sumF / 100));
 }
