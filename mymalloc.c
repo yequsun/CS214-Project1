@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include "mymalloc.h"
 
-max_size = sizeof(myblock);
-min_alloc = 1;
-Metadata* first_metadata = &myblock[0];
+int max_size = sizeof(myblock);
+int min_alloc = 1;
+Metadata* first_metadata = (Metadata*)&myblock[0];
 
 void init(){
 	Metadata* initial_metadata = first_metadata;
@@ -86,8 +86,8 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 	}
 	*/
 	if(req_size + sizeof(Metadata) > max_size){
+		printf("Error in %s, line %d: Not enough space.\n", file_name, line_number);
 		return NULL;
-		//no enough space
 	}
 
 	if(req_size<min_alloc){
@@ -120,6 +120,8 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 
 			return get_address(cur);
 		}else if(is_last(cur)){
+			printf("Error in %s, line %d: No suitable empty space.\n", file_name, line_number);
+		
 			//This is the last block but no match
 			return NULL;
 		}else{
@@ -137,12 +139,12 @@ void myfree(void* ptr, const char* file_name, int line_number){
 		return;
 	}
 
-	if((ptr-sizeof(Metadata)) < first_metadata || ptr > &myblock[max_size-1]){
+	Metadata* meta_ptr = (Metadata*)(ptr - sizeof(Metadata));
+		
+	if(meta_ptr < first_metadata || (char *)ptr > &myblock[max_size-1]){
 		printf("Error in %s, line %d: Invalid pointer.\n", file_name, line_number);
 		return;
 	}
-	
-	Metadata* meta_ptr = (Metadata*)(ptr - sizeof(Metadata));
 	
 	if(!allocated(meta_ptr)){
 		printf("Error in %s, line %d: Can't free unallocated memory.\n", file_name, line_number);

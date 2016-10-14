@@ -12,7 +12,7 @@ double workloadA(){
 	gettimeofday(&t1, NULL);
 	
 	for(i = 0; i < 3000; i++){
-		p_array[i] = NULL;
+		p_array[i] = malloc(1);
 	}
 	
 	for(i = 0; i < 3000; i++){
