@@ -12,7 +12,7 @@ void main(){
 	
 	//workload A
 	for(i = 0; i < 3000; i++){
-		p_array[i] = mymalloc(1);
+		p_array[i] = malloc(1);
 	}
 	
 	for(i = 0; i < 3000; i++){
@@ -22,8 +22,8 @@ void main(){
 	//workload B
 	
 	for(i = 0; i < 3000; i++){
-		void* ptr = mymalloc(1);
-		myfree(ptr);
+		void* ptr = malloc(1);
+		free(ptr);
 	}
 	
 	//workload C
@@ -38,7 +38,7 @@ void main(){
 		
 		//if rand() chose 0, or if the stack is empty, malloc a new byte
 		if(rannum == 0 || size == 0){
-			p_array[size] = mymalloc(sizeof(char));
+			p_array[size] = malloc(1);
 			malloc_counter++;
 			size++;
 		}
@@ -47,11 +47,11 @@ void main(){
 			int entry = rand() % (size);
 			
 			if(entry == (size - 1)){
-				myfree(p_array[entry]);
+				free(p_array[entry]);
 				p_array[entry] = 0;
 			}
 			else{
-				myfree(p_array[rannum]);
+				free(p_array[rannum]);
 				p_array[rannum] = p_array[size-1];
 				p_array[size-1] = 0;
 			}
@@ -61,7 +61,7 @@ void main(){
 	
 	//free any remaining pointers
 	while(size > 0){
-		myfree(p_array[size-1]);
+		free(p_array[size-1]);
 		size--;
 	}
 	
@@ -76,7 +76,7 @@ void main(){
 		//if rand() chose 0, or if the stack is empty, malloc a new byte
 		if(rannum == 0 || size == 0){
 			int blocksize = rand() % 2500;
-			p_array[size] = mymalloc(blocksize);
+			p_array[size] = malloc(blocksize);
 			malloc_counter++;
 			size++;
 		}
@@ -85,11 +85,11 @@ void main(){
 			int entry = rand() % (size);
 			
 			if(entry == (size - 1)){
-				myfree(p_array[entry]);
+				free(p_array[entry]);
 				p_array[entry] = 0;
 			}
 			else{
-				myfree(p_array[entry]);
+				free(p_array[entry]);
 				p_array[entry] = p_array[size-1];
 				p_array[size-1] = 0;
 			}
@@ -99,7 +99,7 @@ void main(){
 	
 	//free any remaining pointers
 	while(size > 0){
-		myfree(p_array[size-1]);
+		free(p_array[size-1]);
 		size--;
 	}
 }
