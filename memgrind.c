@@ -1,17 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <string.h>
 #include "mymalloc.h"
 
 void main(){
 	
 	srand((unsigned int)time(NULL));
-	
-	//workload A
-	char* p_array[3000];
+	void* p_array[3000];
 	int i;
 	
+	//workload A
 	for(i = 0; i < 3000; i++){
-		p_array[i] = (char *)mymalloc(sizeof(char));
+		p_array[i] = mymalloc(1);
 	}
 	
 	for(i = 0; i < 3000; i++){
@@ -21,39 +22,84 @@ void main(){
 	//workload B
 	
 	for(i = 0; i < 3000; i++){
-		char* ptr = (char *)mymalloc(sizeof(char));
+		void* ptr = mymalloc(1);
 		myfree(ptr);
 	}
 	
 	//workload C
-	memset(p_array, 0, sizeof(char *)*3000);
+	memset(p_array, 0, sizeof(void *)*3000); //clear out the array
 	
 	int malloc_counter = 0,
-		top = -1;
+		size = 0,
 		rannum;
 	
 	while(malloc_counter < 3000){
 		rannum = rand() % 2;
 		
-		if(rannum == 0){
-			top++;
-			p_array[top] = (char *)mymalloc(sizeof(char));
+		//if rand() chose 0, or if the stack is empty, malloc a new byte
+		if(rannum == 0 || size == 0){
+			p_array[size] = mymalloc(sizeof(char));
 			malloc_counter++;
+			size++;
 		}
-		else if(rannum == 1 && top >= 0){
-			rannum = rand() % (top + 1);
+		//otherwise, choose a random entry and free it, then fill in the gap with the top entry
+		else{
+			int entry = rand() % (size);
 			
-			if(rannum == top){
-				myfree(p_array[top]);
-				p_array[top] = 0;
+			if(entry == (size - 1)){
+				myfree(p_array[entry]);
+				p_array[entry] = 0;
 			}
 			else{
 				myfree(p_array[rannum]);
-				p_array[rannum] = p_array[top];
-				p_array[top] = 0;
+				p_array[rannum] = p_array[size-1];
+				p_array[size-1] = 0;
 			}
+			size--;
 		}
 	}
 	
-	//workload D
+	//free any remaining pointers
+	while(size > 0){
+		myfree(p_array[size-1]);
+		size--;
+	}
+	
+	
+	//workload D - same as C but with variable sized mallocs
+	
+	malloc_counter = 0,
+	size = 0;
+	while(malloc_counter < 100){
+		rannum = rand() % 2;
+		
+		//if rand() chose 0, or if the stack is empty, malloc a new byte
+		if(rannum == 0 || size == 0){
+			int blocksize = rand() % 2500;
+			p_array[size] = mymalloc(blocksize);
+			malloc_counter++;
+			size++;
+		}
+		//otherwise, choose a random entry and free it, then fill in the gap with the top entry
+		else{
+			int entry = rand() % (size);
+			
+			if(entry == (size - 1)){
+				myfree(p_array[entry]);
+				p_array[entry] = 0;
+			}
+			else{
+				myfree(p_array[entry]);
+				p_array[entry] = p_array[size-1];
+				p_array[size-1] = 0;
+			}
+			size--;
+		}
+	}
+	
+	//free any remaining pointers
+	while(size > 0){
+		myfree(p_array[size-1]);
+		size--;
+	}
 }
