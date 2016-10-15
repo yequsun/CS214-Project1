@@ -7,6 +7,7 @@ int min_alloc = 1;
 Metadata* first_metadata = (Metadata*)&myblock[0];
 
 void init(){
+	memset(myblock,0,sizeof(myblock));
 	Metadata* initial_metadata = first_metadata;
 	initial_metadata->size = 5000 - sizeof(Metadata);
 	initial_metadata->alloc_flag = 0;
