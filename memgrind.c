@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <math.h>
 #include "mymalloc.h"
 
 double workloadA(){
@@ -34,7 +35,7 @@ double workloadB(){
 	
 	gettimeofday(&t1, NULL);
 	
-	for(i = 0; i < 3000; i++){
+	for(i = 0; i < 100; i++){
 		void* ptr = malloc(1);
 		free(ptr);
 	}
@@ -43,7 +44,7 @@ double workloadB(){
 	
 	double timespent = (t2.tv_sec - t1.tv_sec) * 1000.0;
 	timespent += (t2.tv_usec - t1.tv_usec) / 1000.0;
-		
+	//print_stats();
 	return timespent;
 }
 
@@ -75,12 +76,12 @@ double workloadC(){
 				free(p_array[entry]);
 				p_array[entry] = 0;
 			}
+			
 			else{
-				free(p_array[rannum]);
-				p_array[rannum] = p_array[size-1];
+				free(p_array[entry]);
+				p_array[entry] = p_array[size-1];
 				p_array[size-1] = 0;
-			}
-			size--;
+			}size--;
 		}
 	}
 	
@@ -113,14 +114,14 @@ double workloadD(){
 		
 		//if rand() chose 0, or if the stack is empty, malloc a new byte
 		if(rannum == 0 || size == 0){
-			int blocksize = rand() % 2500;
+			int blocksize = (rand() % 2500) + 1;
 			p_array[size] = malloc(blocksize);
 			malloc_counter++;
 			size++;
 		}
 		//otherwise, choose a random entry and free it, then fill in the gap with the top entry
 		else{
-			int entry = rand() % (size);
+			int entry = rand() % size;
 			
 			if(entry == (size - 1)){
 				free(p_array[entry]);
@@ -149,37 +150,138 @@ double workloadD(){
 	return timespent;
 }
 
+double workloadE(){
+	void* p_array[150];
+	int malloc_count = 0,
+	size = 0,
+	i;
+
+	struct timeval t1, t2;
+	
+	gettimeofday(&t1, NULL);
+
+	for(i = 0; i < 150; i++){
+		//allocate between 1-16 bytes
+		int rannum = (rand() % 15) + 1;
+		p_array[malloc_count] = malloc(rannum);
+		size++;
+		malloc_count++;
+	}
+	
+	while(malloc_count < 3000){
+
+		for(i = 0; i < 50; i++){
+			int entry = rand() % size;
+			
+			if(entry == (size - 1)){
+				free(p_array[entry]);
+				p_array[entry] = 0;
+			}
+			else{
+				free(p_array[entry]);
+				p_array[entry] = p_array[size-1];
+				p_array[size-1] = 0;
+			}	
+			size--;
+		}
+
+		for(i = 0; i < 50; i++){
+			int rannum = (rand() % 15) + 1;
+			p_array[size] = malloc(rannum);
+			malloc_count++;
+			size++;
+		}
+	}
+	
+	gettimeofday(&t2, NULL);
+	
+	double timespent = (t2.tv_sec - t1.tv_sec) * 1000.0;
+	timespent += (t2.tv_usec - t1.tv_usec) / 1000.0;
+	
+	return timespent;
+}
+
+double workloadF(){
+	void* p_array[150];
+	int malloc_count = 0,
+	size = 0,
+	i;
+
+	struct timeval t1, t2;
+	
+	gettimeofday(&t1, NULL);
+
+
+	for(i = 0; i < 150; i++){
+		p_array[i] = malloc(1);
+		size++;
+		malloc_count++;
+	}
+	
+	while(malloc_count < 3000){
+
+		for(i = 0; i < 50; i++){
+			int entry = rand() % size;
+			
+			if(entry == (size - 1)){
+			free(p_array[entry]);
+			p_array[entry] = 0;
+		}
+		else{
+			free(p_array[entry]);
+			p_array[entry] = p_array[size-1];
+			p_array[size-1] = 0;
+		}
+		size--;
+		
+		}
+
+		for(i = 0; i < 50; i++){
+			p_array[size] = malloc(1);
+			malloc_count++;
+			size++;
+		}
+	}
+
+	gettimeofday(&t2, NULL);
+	
+	double timespent = (t2.tv_sec - t1.tv_sec) * 1000.0;
+	timespent += (t2.tv_usec - t1.tv_usec) / 1000.0;
+
+	return timespent;
+	
+}
 
 void main(){
-	init();//Initialize the metadata for myblock
 	
 	srand((unsigned int)time(NULL));
 	int i;
 	double sumA = 0,
 		sumB = 0,
 		sumC = 0,
-		sumD = 0;
-	
+		sumD = 0,
+		sumE = 0,
+		sumF = 0;
 
 	for(i = 0; i < 100; i++){
 
-	sumA += workloadA();
-	//sumB += workloadB();
+	init();
+	//sumA += workloadA();
+	sumB += workloadB();
+
+	init();
 	//sumC += workloadC();
-	//sumD += workloadD();
+	init();
+	sumD += workloadD();
 	
 	//sumE += workloadE();
 	//sumF += workloadF();
 	}
-
-	printf("Workload A averaged %lf ms.\n", (sumA / 100));
-	//printf("Workload B averaged %lf ms.\n", (sumB / 100));
+	//printf("Workload A averaged %lf ms.\n", (sumA / 100));
+	printf("Workload B averaged %lf ms.\n", (sumB / 100));
 	//printf("Workload C averaged %lf ms.\n", (sumC / 100));
-	//printf("Workload D averaged %lf ms.\n", (sumD / 100));
+	printf("Workload D averaged %lf ms.\n", (sumD / 100));
 	
 	//printf("Workload E averaged %lf ms.\n", (sumE / 100));
 	//printf("Workload F averaged %lf ms.\n", (sumF / 100));
-
-
-
 }

@@ -148,7 +148,7 @@ void myfree(void* ptr, const char* file_name, int line_number){
 			
 	//merge left
 	Metadata* prv = prev(meta_ptr);
-	if(prv->alloc_flag == 0){
+	if(meta_ptr!= first_metadata && prv->alloc_flag == 0){
 		new_size = get_size(meta_ptr) + get_size(prv) + sizeof(Metadata);
 		prv->size = new_size;
 	}
