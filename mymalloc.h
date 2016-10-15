@@ -11,7 +11,7 @@ static char myblock[5000]; //memory block
 typedef struct{
 	unsigned int size:31;//The size of this block
 	unsigned int alloc_flag:1;//If the block is allocated. 0 - not. 1 - yes
-	unsigned int prev_index:31;//The index number in myblock[] of the previous block metadata
+	unsigned int prev_size:31;//The size of the previous block
 	unsigned int last_flag:1;//If this block is the last block. 0- not. 1 -yes
 }Metadata;
 

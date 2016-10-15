@@ -8,9 +8,9 @@ Metadata* first_metadata = (Metadata*)&myblock[0];
 
 void init(){
 	Metadata* initial_metadata = first_metadata;
-	initial_metadata->size = max_size - sizeof(Metadata);
+	initial_metadata->size = 5000 - sizeof(Metadata);
 	initial_metadata->alloc_flag = 0;
-	initial_metadata->prev_index = 0;
+	initial_metadata->prev_size = 0;
 	initial_metadata->last_flag = 1;
 }
 
@@ -20,7 +20,7 @@ Metadata* next(Metadata* cur){
 	//check last flag before calling this method
 	char* ret;
 	ret = (char*)cur;
-	ret += sizeof(Metadata);
+	ret += sizeof(Metadata)/sizeof(char);
 	ret += cur->size;
 	return (Metadata*)ret;
 }
@@ -28,7 +28,9 @@ Metadata* next(Metadata* cur){
 Metadata* prev(Metadata* cur){
 	//return the metadata pointer of the previous block
 	char* ret;
-	ret = (char*)myblock[cur->prev_index];
+	ret = (char*)cur;
+	ret -= cur->prev_size;
+	ret -= sizeof(Metadata);
 	return (Metadata*)ret;
 }
 
@@ -51,11 +53,11 @@ int is_last(Metadata* cur){
 void* get_address(Metadata* cur){
 	char* ret;
 	ret = (char*)cur;
-	ret += sizeof(Metadata);
+	ret += sizeof(Metadata)/sizeof(char);
 	return (void*)ret;
 }
 
-int get_index(Metadata* cur){
+/*int get_index(Metadata* cur){
 	char* a = &myblock[0];
     char* b = &myblock[1];
     int offset = b - a;
@@ -64,27 +66,10 @@ int get_index(Metadata* cur){
 	ret = (cur - first_metadata)/offset;
 	return ret;
 }
+*/
 
 void* mymalloc(size_t req_size,const char* file_name, int line_number){
 
-	/*if(req_size<=0 || req_size>5000){
-		printf("Error\n");
-		exit(0);
-	}
-
-	char* cur = &myblock[0];
-	while(cur <= &myblock[5000]){
-		if(!allocated(cur) && actual_size(cur)<= req_size){
-			int size_before = actual_size(cur);
-			*(int*)cur = set_metadata(req_size,1);
-			int size_remains = size_before - actual_size(cur);
-			*(int*)(cur+4+actual_size(cur)) = set_metadata(size_remains,0);
-			return (cur+4);
-		}else{
-			cur = cur + 4 + actual_size(cur);
-		}
-	}
-	*/
 	if(req_size + sizeof(Metadata) > max_size){
 		printf("Error in %s, line %d: Not enough space.\n", file_name, line_number);
 		return NULL;
@@ -96,7 +81,7 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 	}
 
 	Metadata* cur = first_metadata;//Start from the first metadata
-	do{
+	while(!(cur < first_metadata || (char *)cur > &myblock[max_size-1])){
 		if(!allocated(cur) && get_size(cur)>=req_size){
 			//this block fits. Allocate memory here
 			int old_size = get_size(cur);
@@ -107,17 +92,17 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 				cur->size = req_size;
 				Metadata* new_metadata;
 				char* temp = (char*)cur;
-				temp += (sizeof(Metadata)+get_size(cur));
+				temp += (sizeof(Metadata))/sizeof(char);
+				temp += get_size(cur);
 				new_metadata = (Metadata*)temp;
 
 				//set attributes for new metadata
 				new_metadata->alloc_flag = 0;
-				new_metadata->size = old_size-sizeof(Metadata);
+				new_metadata->size = old_size-sizeof(Metadata)-cur->size;
 				new_metadata->last_flag = old_last_flag;
 				cur->last_flag = 0;
-				new_metadata->prev_index = get_index(new_metadata);
+				new_metadata->prev_size = get_size(cur);
 			}
-
 			return get_address(cur);
 		}else if(is_last(cur)){
 			printf("Error in %s, line %d: No suitable empty space.\n", file_name, line_number);
@@ -128,7 +113,8 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 			//go to next blcok
 			cur = next(cur);
 		}
-	}while(!is_last(cur));
+	};
+	printf("bp\n");
 	return NULL;
 }
 

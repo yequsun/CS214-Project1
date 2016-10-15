@@ -151,6 +151,7 @@ double workloadD(){
 
 
 void main(){
+	init();//Initialize the metadata for myblock
 	
 	srand((unsigned int)time(NULL));
 	int i;
@@ -178,4 +179,7 @@ void main(){
 	
 	//printf("Workload E averaged %lf ms.\n", (sumE / 100));
 	//printf("Workload F averaged %lf ms.\n", (sumF / 100));
+
+
+
 }
