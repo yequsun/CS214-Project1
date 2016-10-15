@@ -1,0 +1,6 @@
+Workload E:
+We wanted to test performance under a period of extended fragmentation.
+We loaded up memory with 150 blocks, varying in size randomly from 1 to 16 bytes.  We then repeatedly freed 50 blocks at random spots, then malloced 50 new blocks of random size, repeating until 3000 blocks had been malloced. This means that there were always 100 blocks clogging up the list.
+
+Workload F:
+To better interpret the results from E, we wanted a baseline performance.  Accordingly, we went through the same process of 150 mallocs followed by a cycle of 50 frees / 50 mallocs, only this time we only used blocks of 1 byte.
