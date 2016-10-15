@@ -114,7 +114,6 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 			cur = next(cur);
 		}
 	};
-	printf("bp\n");
 	return NULL;
 }
 
