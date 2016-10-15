@@ -153,3 +153,29 @@ void myfree(void* ptr, const char* file_name, int line_number){
 		prv->size = new_size;
 	}
 }
+
+void print_stats(){
+	Metadata* cur = first_metadata;
+	int blocks = 0;
+	int allocated_blocks = 0;
+	int unallocated_blocks = 0;
+	int allocated_space = 0;
+	int unallocated_space = 0;
+
+	while(1){
+		blocks++;
+		if(allocated(cur)){
+			allocated_blocks++;
+			allocated_space += get_size(cur);
+		}else{
+			unallocated_blocks++;
+			unallocated_space += get_size(cur);
+		}
+
+		if(is_last(cur)){
+			break;
+		}
+		cur = next(cur);
+	}
+	printf("No. of blocks: %d, No. of allocated blocks:%d, No. of unallocated blocks:%d, allocated_space: %d, unallocated space: %d\n",blocks,allocated_blocks,unallocated_blocks,allocated_space,unallocated_space);
+}

@@ -20,7 +20,7 @@ Metadata* first_metadata;
 
 int get_size(Metadata* cur);//size of the block
 
-int get_index(Metadata* cur);//index of the metadata in myblock[]
+void print_stats();//print the status of the block
 
 int is_last(Metadata* cur);//if this block is the last one
 
