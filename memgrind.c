@@ -13,7 +13,7 @@ double workloadA(){
 	gettimeofday(&t1, NULL);
 	
 	for(i = 0; i < 3000; i++){
-		p_array[i] = malloc(1);
+		p_array[i] = malloc(2);
 	}
 	
 	for(i = 0; i < 3000; i++){
@@ -44,7 +44,6 @@ double workloadB(){
 	
 	double timespent = (t2.tv_sec - t1.tv_sec) * 1000.0;
 	timespent += (t2.tv_usec - t1.tv_usec) / 1000.0;
-	//print_stats();
 	return timespent;
 }
 
@@ -254,7 +253,8 @@ double workloadF(){
 
 void main(){
 	
-	srand((unsigned int)time(NULL));
+	//srand((unsigned int)time(NULL));
+	
 	int i;
 	double sumA = 0,
 		sumB = 0,
@@ -263,24 +263,24 @@ void main(){
 		sumE = 0,
 		sumF = 0;
 
-	for(i = 0; i < 100; i++){
-
+	for(i = 0; i < 2; i++){
 	init();
-	//sumA += workloadA();
-	sumB += workloadB();
+	sumA += workloadA();
+	//sumB += workloadB();
 
-	init();
+	//init();
 	//sumC += workloadC();
-	init();
-	sumD += workloadD();
+	//init();
+	//sumD += workloadD();
 	
 	//sumE += workloadE();
 	//sumF += workloadF();
 	}
+	print_stats();
 	//printf("Workload A averaged %lf ms.\n", (sumA / 100));
-	printf("Workload B averaged %lf ms.\n", (sumB / 100));
+	//printf("Workload B averaged %lf ms.\n", (sumB / 100));
 	//printf("Workload C averaged %lf ms.\n", (sumC / 100));
-	printf("Workload D averaged %lf ms.\n", (sumD / 100));
+	//printf("Workload D averaged %lf ms.\n", (sumD / 100));
 	
 	//printf("Workload E averaged %lf ms.\n", (sumE / 100));
 	//printf("Workload F averaged %lf ms.\n", (sumF / 100));

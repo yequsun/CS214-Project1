@@ -21,7 +21,7 @@ Metadata* next(Metadata* cur){
 	//check last flag before calling this method
 	char* ret;
 	ret = (char*)cur;
-	ret += sizeof(Metadata)/sizeof(char);
+	ret += sizeof(Metadata);
 	ret += cur->size;
 	return (Metadata*)ret;
 }
@@ -72,7 +72,7 @@ void* get_address(Metadata* cur){
 void* mymalloc(size_t req_size,const char* file_name, int line_number){
 
 	if(req_size + sizeof(Metadata) > max_size){
-		printf("Error in %s, line %d: Not enough space.\n", file_name, line_number);
+		//printf("Error in %s, line %d: Not enough space.\n", file_name, line_number);
 		return NULL;
 	}
 
@@ -106,7 +106,7 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 			}
 			return get_address(cur);
 		}else if(is_last(cur)){
-			printf("Error in %s, line %d: No suitable empty space.\n", file_name, line_number);
+			//printf("Error in %s, line %d: No suitable empty space.\n", file_name, line_number);
 		
 			//This is the last block but no match
 			return NULL;
@@ -121,7 +121,7 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 void myfree(void* ptr, const char* file_name, int line_number){
 
 	if(ptr == NULL){
-		//printf("Error in %s, line %d: Null pointer.\n", file_name, line_number);
+		printf("Error in %s, line %d: Null pointer.\n", file_name, line_number);
 		return;
 	}
 
@@ -143,15 +143,23 @@ void myfree(void* ptr, const char* file_name, int line_number){
 	//merge right
 	Metadata* nxt = next(meta_ptr);
 	if(meta_ptr->last_flag == 0 && nxt->alloc_flag == 0){
+		int old_last_flag = nxt->last_flag;
 		new_size = get_size(meta_ptr) + get_size(nxt) + sizeof(Metadata);
 		meta_ptr->size = new_size;
+
+		meta_ptr->last_flag = old_last_flag;
 	}
 			
 	//merge left
 	Metadata* prv = prev(meta_ptr);
+
 	if(meta_ptr!= first_metadata && prv->alloc_flag == 0){
-		new_size = get_size(meta_ptr) + get_size(prv) + sizeof(Metadata);
-		prv->size = new_size;
+		prv->size += get_size(meta_ptr) + sizeof(Metadata);
+		prv->last_flag = meta_ptr->last_flag;
+
+		if(!meta_ptr->last_flag){
+			nxt->prev_size = get_size(prv);
+		}
 	}
 }
 
@@ -178,5 +186,5 @@ void print_stats(){
 		}
 		cur = next(cur);
 	}
-	printf("No. of blocks: %d, No. of allocated blocks:%d, No. of unallocated blocks:%d, allocated_space: %d, unallocated space: %d\n",blocks,allocated_blocks,unallocated_blocks,allocated_space,unallocated_space);
+	printf("No. of blocks: %d\nNo. of allocated blocks:%d\nNo. of unallocated blocks:%d\nallocated_space: %d\nunallocated space: %d\n",blocks,allocated_blocks,unallocated_blocks,allocated_space,unallocated_space);
 }
