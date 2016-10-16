@@ -35,7 +35,7 @@ double workloadB(){
 	
 	gettimeofday(&t1, NULL);
 	
-	for(i = 0; i < 100; i++){
+	for(i = 0; i < 3000; i++){
 		void* ptr = malloc(1);
 		free(ptr);
 	}
@@ -105,10 +105,9 @@ double workloadD(){
 	size = 0;
 	
 	struct timeval t1, t2;
-	
 	gettimeofday(&t1, NULL);
 	
-	while(malloc_counter < 100){
+	while(malloc_counter < 3000){
 		int rannum = rand() % 2;
 		
 		//if rand() chose 0, or if the stack is empty, malloc a new byte
@@ -121,7 +120,7 @@ double workloadD(){
 		//otherwise, choose a random entry and free it, then fill in the gap with the top entry
 		else{
 			int entry = rand() % size;
-			
+
 			if(entry == (size - 1)){
 				free(p_array[entry]);
 				p_array[entry] = 0;
@@ -253,8 +252,8 @@ double workloadF(){
 
 void main(){
 	
-	//srand((unsigned int)time(NULL));
-	
+	srand((unsigned int)time(NULL));	
+
 	int i;
 	double sumA = 0,
 		sumB = 0,
@@ -263,20 +262,22 @@ void main(){
 		sumE = 0,
 		sumF = 0;
 
-	for(i = 0; i < 2; i++){
-	init();
-	sumA += workloadA();
+	for(i = 0; i < 100; i++){
+	//init();
+	//sumA += workloadA();
 	//sumB += workloadB();
 
 	//init();
 	//sumC += workloadC();
-	//init();
-	//sumD += workloadD();
+	init();
+	sumD += workloadD();
+	printf("****************************************\n");
+	print_stats();
+	
 	
 	//sumE += workloadE();
 	//sumF += workloadF();
 	}
-	print_stats();
 	//printf("Workload A averaged %lf ms.\n", (sumA / 100));
 	//printf("Workload B averaged %lf ms.\n", (sumB / 100));
 	//printf("Workload C averaged %lf ms.\n", (sumC / 100));

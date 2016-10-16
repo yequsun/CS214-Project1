@@ -88,6 +88,7 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 			int old_size = get_size(cur);
 			int old_last_flag = cur->last_flag;
 			cur->alloc_flag = 1;
+			Metadata* nxt = next(cur);			
 
 			if( (get_size(cur)-req_size) >= (sizeof(Metadata)+min_alloc) ){//if the space left is enough for one block
 				cur->size = req_size;
@@ -103,6 +104,7 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 				new_metadata->last_flag = old_last_flag;
 				cur->last_flag = 0;
 				new_metadata->prev_size = get_size(cur);
+				nxt->prev_size = get_size(new_metadata);
 			}
 			return get_address(cur);
 		}else if(is_last(cur)){
@@ -121,7 +123,7 @@ void* mymalloc(size_t req_size,const char* file_name, int line_number){
 void myfree(void* ptr, const char* file_name, int line_number){
 
 	if(ptr == NULL){
-		printf("Error in %s, line %d: Null pointer.\n", file_name, line_number);
+		//printf("Error in %s, line %d: Null pointer.\n", file_name, line_number);
 		return;
 	}
 
@@ -140,26 +142,34 @@ void myfree(void* ptr, const char* file_name, int line_number){
 	meta_ptr->alloc_flag = 0;
 	int new_size;
 	
+	//printf("free data of size %d; ", meta_ptr->size);
 	//merge right
 	Metadata* nxt = next(meta_ptr);
 	if(meta_ptr->last_flag == 0 && nxt->alloc_flag == 0){
-		int old_last_flag = nxt->last_flag;
 		new_size = get_size(meta_ptr) + get_size(nxt) + sizeof(Metadata);
 		meta_ptr->size = new_size;
+		meta_ptr->last_flag = nxt->last_flag;
 
-		meta_ptr->last_flag = old_last_flag;
+		if(!meta_ptr->last_flag){
+			Metadata* new_nxt = next(meta_ptr);
+			new_nxt->prev_size = get_size(meta_ptr);
+		}
+		//printf("After merging right, new size is %d, ", new_size);
 	}
 			
 	//merge left
 	Metadata* prv = prev(meta_ptr);
+	//printf("size is of prev is %d and alloc is %d", prv->size, prv->alloc_flag);
 
-	if(meta_ptr!= first_metadata && prv->alloc_flag == 0){
+	if(meta_ptr != first_metadata && prv->alloc_flag == 0){
 		prv->size += get_size(meta_ptr) + sizeof(Metadata);
 		prv->last_flag = meta_ptr->last_flag;
 
 		if(!meta_ptr->last_flag){
-			nxt->prev_size = get_size(prv);
+			Metadata* new_nxt = next(meta_ptr);
+			new_nxt->prev_size = get_size(prv);
 		}
+		//printf("After merging left, new size is %d", get_size(prv));
 	}
 }
 
@@ -174,9 +184,11 @@ void print_stats(){
 	while(1){
 		blocks++;
 		if(allocated(cur)){
+			printf("allocated: 8 + %d = %d\n", get_size(cur), get_size(cur) + 8);
 			allocated_blocks++;
 			allocated_space += get_size(cur);
 		}else{
+			printf("free: 8 + %d = %d\n", get_size(cur), get_size(cur) + 8);
 			unallocated_blocks++;
 			unallocated_space += get_size(cur);
 		}
@@ -186,5 +198,5 @@ void print_stats(){
 		}
 		cur = next(cur);
 	}
-	printf("No. of blocks: %d\nNo. of allocated blocks:%d\nNo. of unallocated blocks:%d\nallocated_space: %d\nunallocated space: %d\n",blocks,allocated_blocks,unallocated_blocks,allocated_space,unallocated_space);
+	//printf("No. of blocks: %d\nNo. of allocated blocks:%d\nNo. of unallocated blocks:%d\nallocated_space: %d\nunallocated space: %d\n",blocks,allocated_blocks,unallocated_blocks,allocated_space,unallocated_space);
 }
